@@ -1,17 +1,6 @@
 let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
 let commentsData = JSON.parse(localStorage.getItem('commentsData')) || {};
-let customMovies = JSON.parse(localStorage.getItem('customMovies')) || [
-    {
-        id: 1718283940123,
-        imdbID: "tt0944947",
-        title: "Game of Thrones",
-        category: "Series",
-        year: "2011–2019",
-        rating: "9.2/10",
-        desc: "زنجیرەی جیهانی و بەناوبانگی Game of Thrones بەرهەمی کەناڵی HBO.",
-        image: "https://m.media-amazon.com/images/M/5BMXN5N2E6N2E6N2E6N2E6N2E6.jpg"
-    }
-];
+let customMovies = JSON.parse(localStorage.getItem('customMovies')) || [];
 let currentMovie = null;
 
 const moviesContainer = document.getElementById('moviesContainer');
@@ -29,6 +18,15 @@ const commentInput = document.getElementById('commentInput');
 const addMovieModal = document.getElementById('addMovieModal');
 
 let fallbackMovies = [];
+
+// سیستەمی ڕێنمایی بۆ بەکارهێنەری نوێ کاتێک بۆ یەکەمجار لینکەکە دەكاتەوە
+window.addEventListener('DOMContentLoaded', () => {
+    let hasSeenGuide = localStorage.getItem('hasSeenGuide');
+    if (!hasSeenGuide) {
+        alert("بەخێر هاتیت بۆ سینەما پڵەس! 🎬\n\nڕێنمایی بەکارهێنان:\n١. بۆ زیادکردنی فیلم یان زنجیرە، کلیک لەسەر دوگمەی (➕ فیلمی نوێ) بکە لە سەرەوە.\n٢. ناوی فیلمەکە بنووسە یان پۆلێنێک هەڵبژێرە و لەوێوە فیلمەکان هەڵبژێرە.\n٣. فیلمەکان ڕاستەوخۆ لە سەرەتای ریزەکەدا پاشەکەوت دەبن بۆت!");
+        localStorage.setItem('hasSeenGuide', 'true');
+    }
+});
 
 // هەموو ١٢ سێرڤەرە سەرەکییەکە بۆ فیلم و زنجیرە
 function getServers(imdbID, isSeries = false, season = 1, episode = 1) {
@@ -101,7 +99,7 @@ function displayMovies(moviesList) {
     if(!moviesContainer) return;
     moviesContainer.innerHTML = '';
     if (!moviesList || moviesList.length === 0) {
-        moviesContainer.innerHTML = '<p style="color:#777; text-align:center; grid-column:1/-1; margin-top:20px;">هیچ فیلمێک لێرە نییە، تکایە فیلمی نوێ زیاد بکە!</p>';
+        moviesContainer.innerHTML = '<p style="color:#777; text-align:center; grid-column:1/-1; margin-top:20px;">هیچ فیلمێک لێرە نییە، تکایە لە ڕێگەی دوگمەی (➕ فیلمی نوێ) فیلم زیاد بکە!</p>';
         return;
     }
     
@@ -362,7 +360,8 @@ function addSelectedMoviesToDisplay() {
                 image: movie.Poster && movie.Poster !== "N/A" ? movie.Poster : "https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg",
                 servers: getServers(movie.imdbID, isSer)
             };
-            customMovies.push(newCustomMovie);
+            // unshift بەکاردێت تاوەکو فیلمە نوێیەکان ببنە یەکەم لە ریزەکەدا
+            customMovies.unshift(newCustomMovie);
         }
     });
 
@@ -447,7 +446,6 @@ function renderServersList() {
 
         btnGroup.appendChild(btn);
 
-        // تەنها بۆ بەشی زنجیرەکان دوگمەی VLC زیاد دەکەین لەگەڵ ئاگادارکردنەوەی داگرتن
         if (isSeries) {
             const extBtn = document.createElement('a');
             extBtn.href = server.url;
